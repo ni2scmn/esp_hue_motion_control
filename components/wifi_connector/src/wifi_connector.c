@@ -1,6 +1,8 @@
 #include "wifi_connector.h"
 #include "esp_log.h"
 
+#include <string.h>
+
 static const char *TAG = "wifi station";
 static int s_retry_num = 0;
 
@@ -29,7 +31,14 @@ static void event_handler(void *arg, esp_event_base_t event_base,
   }
 }
 
-void wifi_init_sta(void) {
+bool wifi_init_sta(void) {
+
+  if (strlen(CONFIG_WIFI_CONNECTOR_SSID) == 0 ||
+      strlen(CONFIG_WIFI_CONNECTOR_PASSWORD) == 0) {
+    ESP_LOGE(TAG, "Please set SSID and Password via 'idf.py menuconfig'");
+    return false;
+  }
+
   s_wifi_event_group = xEventGroupCreate();
 
   ESP_ERROR_CHECK(esp_netif_init());
@@ -82,10 +91,13 @@ void wifi_init_sta(void) {
   if (bits & WIFI_CONNECTED_BIT) {
     ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
              CONFIG_WIFI_CONNECTOR_SSID, CONFIG_WIFI_CONNECTOR_PASSWORD);
+    return true;
   } else if (bits & WIFI_FAIL_BIT) {
     ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
              CONFIG_WIFI_CONNECTOR_SSID, CONFIG_WIFI_CONNECTOR_PASSWORD);
+    return false;
   } else {
     ESP_LOGE(TAG, "UNEXPECTED EVENT");
+    return false;
   }
 }

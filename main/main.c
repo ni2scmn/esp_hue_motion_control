@@ -89,7 +89,10 @@ void app_main(void) {
 
   // Initialize WiFi
   ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
-  wifi_init_sta();
+  if (!wifi_init_sta()) {
+    ESP_LOGE(TAG, "Failed to initialize WiFi");
+    return;
+  }
 
   // enable internal entropy source (SAR ADC)
   bootloader_random_enable();
