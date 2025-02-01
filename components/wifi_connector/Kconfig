@@ -1,0 +1,13 @@
+menu "WiFi Connection Configuration"
+  config WIFI_CONNECTOR_SSID
+    string "WiFi SSID"
+    help
+      Enter the SSID of the WiFi network you want to connect to.
+  
+  config WIFI_CONNECTOR_PASSWORD
+    string "WiFi Password"
+    help
+      Enter the password of the WiFi network you want to connect to.
+
+
+endmenu

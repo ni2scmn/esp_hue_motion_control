@@ -1,0 +1,12 @@
+menu "Hue API Configuration"
+  config HUE_BRIDGE_IP
+    string "Hue Bridge IP"
+    help
+      Enter the IP address of the Hue Bridge you want to connect to.
+  
+  config HUE_BRIDGE_USERNAME
+    string "Hue Bridge Username"
+    help
+      Enter the username of the Hue Bridge you want to connect to.
+
+endmenu
