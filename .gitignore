@@ -4,3 +4,5 @@ sdkconfig
 sdkconfig.old
 TODO.md
 Ressources.md
+layout/
+.DS_Store
