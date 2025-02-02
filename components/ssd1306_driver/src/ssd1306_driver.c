@@ -75,12 +75,6 @@ esp_err_t ssd1306_setup() {
     return res;
   }
 
-  res = i2c_master_transmit(dev_handle, cmds, sizeof(cmds), -1);
-  if (res != ESP_OK) {
-    printf("I2C transmit failed\n");
-    return res;
-  }
-
   res = ssd1306_clear_screen();
   if (res != ESP_OK) {
     printf("I2C clear screen failed\n");
@@ -95,12 +89,42 @@ esp_err_t ssd1306_clear_screen() {
   return i2c_master_transmit(dev_handle, clear_data, sizeof(clear_data), -1);
 }
 
-esp_err_t ssd1306_write_text(char *text) {
+esp_err_t ssd1306_reset_row_col_ptr() {
+  esp_err_t res;
+  uint8_t cmds[] = {SSD1306_CB_CMD_STREAM,
+                    0x21, // set column address
+                    0x00, // start column
+                    127,  // end column
+                    0x22, // set page address
+                    0x00, // start page
+                    7};   // end page
+
+  res = i2c_master_transmit(dev_handle, cmds, sizeof(cmds), -1);
+  if (res != ESP_OK) {
+    printf("I2C transmit failed\n");
+    return res;
+  }
+  return res;
+}
+
+esp_err_t ssd1306_write_text(char *text, bool append) {
   esp_err_t res;
   uint8_t text_len = strlen(text);
   if (text_len > 128) {
-    printf("Text too long\n");
-    return ESP_ERR_INVALID_SIZE;
+    printf("WARNING: Text too long\n");
+  }
+
+  if (!append) {
+    res = ssd1306_clear_screen();
+    if (res != ESP_OK) {
+      printf("I2C clear screen failed\n");
+      return res;
+    }
+    res = ssd1306_reset_row_col_ptr();
+    if (res != ESP_OK) {
+      printf("I2C reset row col ptr failed\n");
+      return res;
+    }
   }
 
   for (uint8_t i = 0; i < text_len; i++) {
