@@ -45,3 +45,6 @@
 // Charge Pump (pg.62)
 #define SSD1306_CMDSL_CHARGE_PUMP 0x8D // follow with 0x14
 #define SSD1306_CMDVL_CHARGE_PUMP_ON 0x14
+
+// Scrolling Commands
+#define SSD1306_CMDSL_CONT_HORZ_VERT_SCROLL_SETUP 0x29

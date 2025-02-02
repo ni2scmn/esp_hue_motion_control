@@ -4,3 +4,5 @@
 esp_err_t ssd1306_setup();
 esp_err_t ssd1306_write_text(char *text, bool append);
 esp_err_t ssd1306_clear_screen();
+
+esp_err_t ssd1306_vertical_scroll_start();

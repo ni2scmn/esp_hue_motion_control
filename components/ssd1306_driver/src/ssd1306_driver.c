@@ -141,3 +141,18 @@ esp_err_t ssd1306_write_text(char *text, bool append) {
 
   return res;
 }
+
+esp_err_t ssd1306_vertical_scroll_start() {
+  uint8_t data[] = {SSD1306_CB_CMD_STREAM,
+                    SSD1306_CMDSL_CONT_HORZ_VERT_SCROLL_SETUP,
+                    0x00, // dummy byte
+                    0x00, // page start address
+                    0x00, // frame interval
+                    0x07, // page end address
+                    0x3F, // TODO translate magical numbers
+                    0xA3,
+                    0,
+                    8,
+                    0x2F};
+  return i2c_master_transmit(dev_handle, data, sizeof(data), -1);
+}
