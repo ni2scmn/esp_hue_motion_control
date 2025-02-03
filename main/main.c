@@ -20,16 +20,104 @@
 #include "hue_api_parser.h"
 #include "hue_api_wrapper.h"
 #include "motion_sensor.h"
-#include "ssd1306_driver.h"
 #include "wifi_connector.h"
 
 #define PIR_SENSOR_PIN GPIO_NUM_18 // Replace with your chosen GPIO pin
 #define LED_BUILTIN GPIO_NUM_2 // Built-in LED pin for ESP32 (usually GPIO 2)
 
+static const char *TAG = "TODO";
+
+TaskHandle_t activateLightTaskHandle, deactivateGroupedLightTaskHandle,
+    checkMotionTaskHandle;
+
+void activateLightTask(void *parameters) {
+  esp_http_client_config_t cfg = {.url = "https://google.com"};
+  esp_http_client_handle_t client = esp_http_client_init(&cfg);
+  while (1) {
+    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    turn_on_grouped_light(&client, "1ad5cedd-1053-42fe-8319-5997facf8423");
+  }
+}
+
+void deactivateGroupedLightTask(void *parameters) {
+  esp_http_client_config_t cfg = {.url = "https://google.com"};
+  esp_http_client_handle_t client = esp_http_client_init(&cfg);
+  while (1) {
+    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    turn_off_grouped_light(&client, "1ad5cedd-1053-42fe-8319-5997facf8423");
+  }
+}
+
+void checkMotionTask(void *parameters) {
+
+  bool light_activated = false;
+  int last_motion_detected = 0;
+
+  while (1) {
+    int motion_detected = read_pir_motion_sensor();
+
+    if (motion_detected) {
+      last_motion_detected = esp_timer_get_time();
+      ESP_LOGI("PIR_SENSOR", "Motion detected!");
+      if (!light_activated) {
+        light_activated = true;
+        motion_sensor_led_on();
+        xTaskNotifyGive(activateLightTaskHandle);
+      }
+    }
+
+    if (light_activated &&
+        esp_timer_get_time() - last_motion_detected > (10 * 1000000)) {
+      light_activated = false;
+      motion_sensor_led_off();
+      xTaskNotifyGive(deactivateGroupedLightTaskHandle);
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(100)); // Delay
+  }
+}
+
 void app_main(void) {
-  ESP_ERROR_CHECK(ssd1306_setup());
-  ESP_ERROR_CHECK(ssd1306_write_text("Hello, world!", false));
-  ESP_ERROR_CHECK(ssd1306_write_text("This is a test.", true));
-  ESP_ERROR_CHECK(ssd1306_write_text("Wow, it works!", true));
-  printf("Test complete\n");
+  // Initialize NVS
+  esp_err_t ret = nvs_flash_init();
+  if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
+      ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();
+  }
+  ESP_ERROR_CHECK(ret);
+
+  // Initialize WiFi
+  ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
+  if (!wifi_init_sta()) {
+    ESP_LOGE(TAG, "Failed to initialize WiFi");
+    return;
+  }
+
+  // enable internal entropy source (SAR ADC)
+  bootloader_random_enable();
+
+  setup_motion_sensor_led();
+  setup_pir_motion_sensor();
+
+  BaseType_t xReturned;
+
+  xReturned = xTaskCreate(activateLightTask, "ActivateLightTask", 8192, NULL,
+                          configMAX_PRIORITIES - 1, &activateLightTaskHandle);
+  if (xReturned != pdPASS) {
+    ESP_LOGE(TAG, "Failed to create ActivateLightTask");
+  }
+
+  xReturned =
+      xTaskCreate(deactivateGroupedLightTask, "DeactivateGroupedLightTask",
+                  8192, NULL, 1, &deactivateGroupedLightTaskHandle);
+  if (xReturned != pdPASS) {
+    ESP_LOGE(TAG, "Failed to create DeactivateGroupedLightTask");
+  }
+
+  xReturned = xTaskCreate(checkMotionTask, "CheckMotionTask", 4096, NULL, 1,
+                          &checkMotionTaskHandle);
+  if (xReturned != pdPASS) {
+    ESP_LOGE(TAG, "Failed to create CheckMotionTask");
+  }
 }
