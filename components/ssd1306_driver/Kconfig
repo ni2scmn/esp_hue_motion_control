@@ -1,0 +1,12 @@
+menu "SSD1306 Configuration"
+  config SSD1306_SDA_PIN
+    int "SSD1306 SDA Pin"
+    help
+      Enter the SDA GPIO pin of the SSD1306 display.
+  
+  config SSD1306_SCL_PIN
+    int "SSD1306 SCL Pin"
+    help
+      Enter the SCL GPIO pin of the SSD1306 display.
+
+endmenu
