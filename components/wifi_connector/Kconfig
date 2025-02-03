@@ -8,6 +8,11 @@ menu "WiFi Connection Configuration"
     string "WiFi Password"
     help
       Enter the password of the WiFi network you want to connect to.
-
+  
+  config WIFI_CONNECTOR_HOSTNAME
+    string "Hostname"
+    default "esp32"
+    help
+      Enter the hostname of the device.
 
 endmenu
