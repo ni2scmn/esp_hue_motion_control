@@ -12,11 +12,11 @@ i2c_master_bus_handle_t master_bus_handle;
 i2c_master_dev_handle_t dev_handle;
 
 esp_err_t i2c_master_init(i2c_master_bus_handle_t *bus_handle) {
-  i2c_master_bus_config_t i2c_mst_config = {.clk_source = I2C_CLK_SRC_DEFAULT,
-                                            .sda_io_num = SSD1306_SDA_PIN,
-                                            .scl_io_num = SSD1306_SCL_PIN,
-                                            .flags.enable_internal_pullup =
-                                                true};
+  i2c_master_bus_config_t i2c_mst_config = {
+      .clk_source = I2C_CLK_SRC_DEFAULT,
+      .sda_io_num = CONFIG_SSD1306_SDA_PIN,
+      .scl_io_num = CONFIG_SSD1306_SCL_PIN,
+      .flags.enable_internal_pullup = true};
 
   return i2c_new_master_bus(&i2c_mst_config, bus_handle);
 }

@@ -4,10 +4,6 @@
 #define SSD1306_WIDTH 128
 #define SSD1306_HEIGHT 64
 
-// TODO config
-#define SSD1306_SDA_PIN 21
-#define SSD1306_SCL_PIN 22
-
 // Control byte
 #define SSD1306_CB_CMD_SINGLE 0x80
 #define SSD1306_CB_CMD_STREAM 0x00
