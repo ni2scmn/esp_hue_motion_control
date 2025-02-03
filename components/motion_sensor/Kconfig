@@ -1,0 +1,6 @@
+menu "PIR Motion Sensor Configuration"
+  config PIR_SENSOR_PIN
+    int "PIR Sensor Pin"
+    help
+      Enter the GPIO pin of the PIR motion sensor.
+endmenu

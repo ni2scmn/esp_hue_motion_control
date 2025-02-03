@@ -22,9 +22,6 @@
 #include "motion_sensor.h"
 #include "wifi_connector.h"
 
-#define PIR_SENSOR_PIN GPIO_NUM_18 // Replace with your chosen GPIO pin
-#define LED_BUILTIN GPIO_NUM_2 // Built-in LED pin for ESP32 (usually GPIO 2)
-
 static const char *TAG = "TODO";
 
 TaskHandle_t activateLightTaskHandle, deactivateGroupedLightTaskHandle,
