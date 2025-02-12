@@ -33,8 +33,9 @@ static void event_handler(void *arg, esp_event_base_t event_base,
 
 bool wifi_init_sta(void) {
 
-  if (strlen(CONFIG_WIFI_CONNECTOR_SSID) == 0 ||
-      strlen(CONFIG_WIFI_CONNECTOR_PASSWORD) == 0) {
+  if ((strlen(CONFIG_WIFI_CONNECTOR_SSID) == 0 ||
+       strlen(CONFIG_WIFI_CONNECTOR_PASSWORD) == 0) &&
+      CONFIG_WIFI_WOKWI_SIMULATOR == 0) {
     ESP_LOGE(TAG, "Please set SSID and Password via 'idf.py menuconfig'");
     return false;
   }

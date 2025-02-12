@@ -1,4 +1,10 @@
 menu "WiFi Connection Configuration"
+  config WIFI_WOKWI_SIMULATOR
+    bool "Wokwi Simulator"
+    default false
+    help
+      Enable this option if you are using the Wokwi Simulator.
+
   config WIFI_CONNECTOR_SSID
     string "WiFi SSID"
     help
