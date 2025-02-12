@@ -20,6 +20,12 @@
       "attrs": {
         "i2c-address": "0x3C"
       }
+    },
+    {
+      "type": "wokwi-pir-motion-sensor",
+      "id": "pir",
+      "top": 90,
+      "left": 220
     }
   ],
   "connections": [
@@ -38,7 +44,7 @@
     [
       "esp:5V",
       "ssd1306:VIN",
-      "black"
+      "red"
     ],
     [
       "esp:GND.2",
@@ -48,12 +54,27 @@
     [
       "esp:21",
       "ssd1306:DATA",
-      "black"
+      "blue"
     ],
     [
       "esp:22",
       "ssd1306:CLK",
+      "green"
+    ],
+    [
+      "esp:GND.2",
+      "pir:GND",
       "black"
+    ],
+    [
+      "esp:3V3",
+      "pir:VCC",
+      "red"
+    ],
+    [
+      "esp:18",
+      "pir:OUT",
+      "purple"
     ]
   ],
   "dependencies": {}
