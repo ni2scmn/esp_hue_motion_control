@@ -42,7 +42,7 @@ esp_err_t i2c_master_create_device(i2c_master_bus_handle_t *bus_handle,
   return i2c_master_bus_add_device(*bus_handle, &dev_cfg, dev_handle);
 }
 
-esp_err_t ssd1306_setup() {
+esp_err_t ssd1306_setup(bool rotate) {
   esp_err_t res;
 
   res = i2c_master_init(&master_bus_handle);
@@ -69,6 +69,11 @@ esp_err_t ssd1306_setup() {
       0xA0,                                    // start page address
       0xB7,                                    // end page address
       SSD1306_CMD_DISPLAY_ON};                 // 0xAF};
+
+  if (rotate) {
+    data[3] = SSD1306_CMD_SET_SEGMENT_REMAP_TRUE;
+    data[4] = SSD1306_CMD_SET_COM_SCAN_MODE_REMAP;
+  }
   res = i2c_master_transmit(dev_handle, data, sizeof(data), -1);
   if (res != ESP_OK) {
     printf("I2C setup ssd1306 failed\n");
