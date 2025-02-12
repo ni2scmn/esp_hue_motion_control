@@ -20,12 +20,25 @@
 #include "hue_api_parser.h"
 #include "hue_api_wrapper.h"
 #include "motion_sensor.h"
+#include "ssd1306_driver.h"
 #include "wifi_connector.h"
 
 static const char *TAG = "TODO";
 
 TaskHandle_t activateLightTaskHandle, deactivateGroupedLightTaskHandle,
     checkMotionTaskHandle;
+
+void setupDisplayTask(void *parameters) {
+  ssd1306_setup(true);
+  ssd1306_write_text("Hello, world!", false);
+  vTaskDelete(NULL);
+}
+
+void setupMotionSensorTask(void *parameters) {
+  setup_motion_sensor_led();
+  setup_pir_motion_sensor();
+  vTaskDelete(NULL);
+}
 
 void activateLightTask(void *parameters) {
   esp_http_client_config_t cfg = {.url = "https://google.com"};
@@ -98,6 +111,19 @@ void app_main(void) {
   setup_pir_motion_sensor();
 
   BaseType_t xReturned;
+
+  xReturned = xTaskCreate(setupMotionSensorTask, "SetupMotionSensorTask", 4096,
+                          NULL, 1, NULL);
+
+  if (xReturned != pdPASS) {
+    ESP_LOGE(TAG, "Failed to create SetupMotionSensorTask");
+  }
+
+  xReturned =
+      xTaskCreate(setupDisplayTask, "setupDisplayTask", 8192, NULL, 1, NULL);
+  if (xReturned != pdPASS) {
+    ESP_LOGE(TAG, "Failed to create setupDisplayTask");
+  }
 
   xReturned = xTaskCreate(activateLightTask, "ActivateLightTask", 8192, NULL,
                           configMAX_PRIORITIES - 1, &activateLightTaskHandle);
