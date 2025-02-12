@@ -23,7 +23,29 @@
 #include "ssd1306_driver.h"
 #include "wifi_connector.h"
 
+#include "mdns.h"
+
 static const char *TAG = "TODO";
+
+esp_err_t setup_mdns(void) {
+  // initialize mDNS service
+  esp_err_t err = mdns_init();
+  if (err) {
+    printf("MDNS Init failed: %d\n", err);
+    return ESP_OK;
+  }
+
+  // set hostname
+  mdns_hostname_set("esp32-motion-control");
+  // set default instance
+  mdns_instance_name_set("ESP32 Motion Control");
+
+  mdns_service_add(NULL, "_hue_motion_control", "_tcp", 80, NULL, 0);
+
+  printf("success");
+
+  return ESP_OK;
+}
 
 TaskHandle_t activateLightTaskHandle, deactivateGroupedLightTaskHandle,
     checkMotionTaskHandle;
@@ -142,5 +164,10 @@ void app_main(void) {
                           &checkMotionTaskHandle);
   if (xReturned != pdPASS) {
     ESP_LOGE(TAG, "Failed to create CheckMotionTask");
+  }
+
+  esp_err_t mdns_setup_err = setup_mdns();
+  if (mdns_setup_err != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to setup mDNS: %s", esp_err_to_name(mdns_setup_err));
   }
 }
