@@ -23,7 +23,9 @@
 #include "ssd1306_driver.h"
 #include "wifi_connector.h"
 
-static const char *TAG = "TODO";
+#define DRY_RUN true
+
+static const char *TAG = "MAIN";
 
 TaskHandle_t activateLightTaskHandle, deactivateGroupedLightTaskHandle,
     checkMotionTaskHandle;
@@ -45,7 +47,11 @@ void activateLightTask(void *parameters) {
   esp_http_client_handle_t client = esp_http_client_init(&cfg);
   while (1) {
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-    turn_on_grouped_light(&client, "1ad5cedd-1053-42fe-8319-5997facf8423");
+    if (DRY_RUN) {
+      ESP_LOGI(TAG, "Dry run: Activating light");
+    } else {
+      turn_on_grouped_light(&client, "1ad5cedd-1053-42fe-8319-5997facf8423");
+    }
   }
 }
 
@@ -54,7 +60,11 @@ void deactivateGroupedLightTask(void *parameters) {
   esp_http_client_handle_t client = esp_http_client_init(&cfg);
   while (1) {
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-    turn_off_grouped_light(&client, "1ad5cedd-1053-42fe-8319-5997facf8423");
+    if (DRY_RUN) {
+      ESP_LOGI(TAG, "Dry run: Deactivating light");
+    } else {
+      turn_off_grouped_light(&client, "1ad5cedd-1053-42fe-8319-5997facf8423");
+    }
   }
 }
 
