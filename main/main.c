@@ -16,6 +16,7 @@
 #include "nvs_flash.h"
 #include <string.h>
 
+#include "config_server.h"
 #include "hue_api_config.h"
 #include "hue_api_parser.h"
 #include "hue_api_wrapper.h"
@@ -26,6 +27,8 @@
 #define DRY_RUN true
 
 static const char *TAG = "MAIN";
+
+const app_config_t *app_config = NULL;
 
 TaskHandle_t activateLightTaskHandle, deactivateGroupedLightTaskHandle,
     checkMotionTaskHandle;
@@ -47,6 +50,12 @@ void activateLightTask(void *parameters) {
   esp_http_client_handle_t client = esp_http_client_init(&cfg);
   while (1) {
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+    if (!app_config->active) {
+      ESP_LOGI(TAG, "Not active, skip activating light");
+      continue;
+    }
+
     if (DRY_RUN) {
       ESP_LOGI(TAG, "Dry run: Activating light");
     } else {
@@ -60,6 +69,12 @@ void deactivateGroupedLightTask(void *parameters) {
   esp_http_client_handle_t client = esp_http_client_init(&cfg);
   while (1) {
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+    if (!app_config->active) {
+      ESP_LOGI(TAG, "Not active, skip deactivating light");
+      continue;
+    }
+
     if (DRY_RUN) {
       ESP_LOGI(TAG, "Dry run: Deactivating light");
     } else {
@@ -78,7 +93,7 @@ void checkMotionTask(void *parameters) {
 
     if (motion_detected) {
       last_motion_detected = esp_timer_get_time();
-      ESP_LOGI("PIR_SENSOR", "Motion detected!");
+      ESP_LOGD(TAG, "Motion detected!");
       if (!light_activated) {
         light_activated = true;
         motion_sensor_led_on();
@@ -117,8 +132,10 @@ void app_main(void) {
   // enable internal entropy source (SAR ADC)
   bootloader_random_enable();
 
-  setup_motion_sensor_led();
-  setup_pir_motion_sensor();
+  httpd_handle_t config_server_handle = create_config_server_handle();
+  start_config_server(&config_server_handle);
+
+  app_config = get_config();
 
   BaseType_t xReturned;
 
