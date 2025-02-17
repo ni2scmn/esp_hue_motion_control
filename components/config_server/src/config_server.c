@@ -18,6 +18,7 @@ char *format_status_response(void) {
 const app_config_t *get_config() { return &config; }
 
 esp_err_t get_status_handler(httpd_req_t *req) {
+  ESP_LOGI(TAG, "GET /status");
   /* Send a simple response */
   httpd_resp_set_hdr(req, "Connection", "keep-alive");
   char *resp = format_status_response();
@@ -27,6 +28,7 @@ esp_err_t get_status_handler(httpd_req_t *req) {
 }
 
 esp_err_t set_status_handler(httpd_req_t *req) {
+  ESP_LOGI(TAG, "POST /status");
   char content[200];
 
   bool found_p_in_body = false;
