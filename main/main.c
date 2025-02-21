@@ -34,8 +34,12 @@ TaskHandle_t activateLightTaskHandle, deactivateGroupedLightTaskHandle,
     checkMotionTaskHandle;
 
 void setupDisplayTask(void *parameters) {
-  ssd1306_setup(true);
-  ssd1306_write_text("Hello, world!", false);
+  SSD1306Config ssd_config = ssd1306_default_config();
+  ssd_config.invert_orientation = true;
+  SSD1306Handle *handle = malloc(sizeof(SSD1306Handle));
+  esp_err_t res = ssd1306_setup(handle, &ssd_config);
+  ssd1306_write_text(handle, "Hello, world!", false);
+  free(handle);
   vTaskDelete(NULL);
 }
 
