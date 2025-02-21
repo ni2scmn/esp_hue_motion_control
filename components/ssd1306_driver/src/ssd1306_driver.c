@@ -114,6 +114,11 @@ esp_err_t ssd1306_clear_screen(SSD1306Handle *handle) {
 
 esp_err_t ssd1306_reset_row_col_ptr(SSD1306Handle *handle) {
   esp_err_t res;
+
+  if (handle->conf.addressing_mode == SSD1306_PAGE_ADRESSING) {
+    return ESP_ERR_NOT_SUPPORTED;
+  }
+
   uint8_t cmds[] = {SSD1306_CB_CMD_STREAM,
                     0x21, // set column address
                     0x00, // start column
@@ -130,24 +135,23 @@ esp_err_t ssd1306_reset_row_col_ptr(SSD1306Handle *handle) {
   return res;
 }
 
-esp_err_t ssd1306_write_text(SSD1306Handle *handle, char *text, bool append) {
+esp_err_t ssd1306_write_text(SSD1306Handle *handle, char *text) {
   esp_err_t res = ESP_OK;
   uint8_t text_len = strlen(text);
   if (text_len > 128) {
     printf("WARNING: Text too long\n");
   }
 
-  if (!append) {
-    res = ssd1306_clear_screen(handle);
-    if (res != ESP_OK) {
-      printf("I2C clear screen failed\n");
-      return res;
-    }
-    res = ssd1306_reset_row_col_ptr(handle);
-    if (res != ESP_OK) {
-      printf("I2C reset row col ptr failed\n");
-      return res;
-    }
+  uint8_t page = handle->conf.page_cursor++;
+  uint8_t cmds[] = {SSD1306_CB_CMD_STREAM,
+                    0xB0 | page, // set page address
+                    0x00,        // set lower column address
+                    0x10};       // set higher column address
+
+  res = i2c_master_transmit(handle->dev_handle, cmds, sizeof(cmds), -1);
+  if (res != ESP_OK) {
+    printf("I2C write text failed\n");
+    return res;
   }
 
   for (uint8_t i = 0; i < text_len; i++) {

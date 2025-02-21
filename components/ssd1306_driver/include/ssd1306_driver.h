@@ -13,6 +13,8 @@ typedef struct _SSD1306Config {
   bool invert_orientation;
   uint8_t sdaPin;
   uint8_t sclPin;
+
+  uint8_t page_cursor;
 } SSD1306Config;
 
 typedef struct _SSD1306Handle {
@@ -24,7 +26,7 @@ typedef struct _SSD1306Handle {
 SSD1306Config ssd1306_default_config();
 
 esp_err_t ssd1306_setup(SSD1306Handle *handle, SSD1306Config *conf);
-esp_err_t ssd1306_write_text(SSD1306Handle *handle, char *text, bool append);
+esp_err_t ssd1306_write_text(SSD1306Handle *handle, char *text);
 esp_err_t ssd1306_clear_screen(SSD1306Handle *handle);
 
 esp_err_t ssd1306_vertical_scroll_start(SSD1306Handle *handle);
